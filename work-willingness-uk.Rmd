@@ -1,0 +1,59 @@
+---
+title: "Analysis of the willingness of working in UK"
+author: "Yining Chen"
+date: "2022/5/1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(readr)
+
+attitude_levels <- c(
+  "Support",
+  "Neither support nor oppose",
+  "Oppose")
+
+homesick_levels <- c(
+  "Yes",
+  "Maybe",
+  "No")
+
+rank_levels <- c(
+  "1",
+  "2",
+  "3",
+  "4",
+  "5")
+
+d_willingness <- read_csv(
+  '../data/responses.csv',
+  col_types = cols(
+    col_factor(),
+    col_factor(),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE, levels = attitude_levels),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE, levels = homesick_levels),
+    col_factor(ordered = TRUE),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(ordered = TRUE, levels = rank_levels),
+    col_factor(),
+    col_factor(),
+    col_factor(),
+    col_factor(),
+    col_factor()
+  ))
+```
+
+
+
