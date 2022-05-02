@@ -9,6 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(readr)
+library(psych)
+library(ggplot2)
+library(knitr)
+
 
 attitude_levels <- c(
   "Support",
@@ -31,7 +35,6 @@ d_willingness <- read_csv(
   '../data/responses.csv',
   col_types = cols(
     col_factor(),
-    col_factor(),
     col_factor(ordered = TRUE),
     col_factor(ordered = TRUE),
     col_factor(ordered = TRUE),
@@ -49,11 +52,87 @@ d_willingness <- read_csv(
     col_factor(ordered = TRUE, levels = rank_levels),
     col_factor(),
     col_factor(),
-    col_factor(),
-    col_factor(),
-    col_factor()
-  ))
+     ))
+
+d_willingness <- d_willingness %>%
+  mutate(
+    across(
+      .cols = c(ends_with('effect'),starts_with('t2'),starts_with('psw'),starts_with('rank')),
+      .fns = as.numeric,
+      .names = '{.col}_coded'
+    )
+  )
+
+keys_list <- list(
+  
+)
 ```
+
+# Demographic characteristics of the sample
+
+## Gender
+```{r}
+d_willingness %>%
+  count(gender)
+
+d_willingness %>%
+  ggplot(aes(x = gender)) +
+  geom_bar()
+```
+
+## Country
+```{r}
+d_willingness %>%
+  count(country)
+
+d_willingness %>%
+  ggplot(aes(x = country)) +
+  geom_bar()
+```
+
+## futlocation
+```{r}
+d_willingness %>%
+  count(futlocation)
+d_willingness %>%
+  ggplot(aes(x = futlocation)) +
+  geom_bar() +
+  coord_flip()
+
+```
+
+# likert items
+```{r}
+d_willingness <- d_willingness %>%
+  mutate(
+    across(
+      .cols = c('familyattitude','homesick'),
+      .fns = as.numeric,
+      .names = '{.col}_coded'
+    )
+  )
+
+d_willingness %>%
+  ggplot(aes(x = familyattitude)) +
+  geom_bar()
+
+d_willingness %>%
+  ggplot(aes(x = homesick)) +
+  geom_bar()
+```
+
+
+```{r}
+d_willingness %>%
+  select(ends_with('effect'))
+  apply()
+
+
+```
+
+
+
+
 
 
 
