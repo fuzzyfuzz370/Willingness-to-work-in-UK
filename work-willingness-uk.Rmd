@@ -15,36 +15,50 @@ library(knitr)
 
 
 attitude_levels <- c(
-  "Support",
+  "Oppose",
   "Neither support nor oppose",
-  "Oppose")
+  "Support")
 
 homesick_levels <- c(
-  "Yes",
+  "No",
   "Maybe",
-  "No")
+  "Yes")
 
 rank_levels <- c(
+  "5",
+  "4",
+  "3",
+  "2",
+  "1")
+
+likert_levels <- c(
+  "0",
   "1",
   "2",
   "3",
   "4",
-  "5")
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10"
+)
 
 d_willingness <- read_csv(
   '../data/responses.csv',
   col_types = cols(
     col_factor(),
-    col_factor(ordered = TRUE),
-    col_factor(ordered = TRUE),
-    col_factor(ordered = TRUE),
-    col_factor(ordered = TRUE),
-    col_factor(ordered = TRUE),
+    col_number(),
+    col_number(),
+    col_number(),
+    col_number(),
+    col_number(),
     col_factor(ordered = TRUE, levels = attitude_levels),
-    col_factor(ordered = TRUE),
-    col_factor(ordered = TRUE),
+    col_number(),
+    col_number(),
     col_factor(ordered = TRUE, levels = homesick_levels),
-    col_factor(ordered = TRUE),
+    col_number(),
     col_factor(ordered = TRUE, levels = rank_levels),
     col_factor(ordered = TRUE, levels = rank_levels),
     col_factor(ordered = TRUE, levels = rank_levels),
@@ -57,15 +71,35 @@ d_willingness <- read_csv(
 d_willingness <- d_willingness %>%
   mutate(
     across(
-      .cols = c(ends_with('effect'),starts_with('t2'),starts_with('psw'),starts_with('rank')),
+      .cols = c(starts_with('rank'),'homesick','familyattitude'),
       .fns = as.numeric,
       .names = '{.col}_coded'
     )
   )
 
 keys_list <- list(
-  
+  visa_effect = c(
+    'visaeffect',
+    'rankpsw_coded',
+    'rankt2_coded',
+    'pswdifficulty'
+  ),
+  visa_difficulty = c(
+    'pswdifficulty',
+    't2difficulty'
+  ),
+  attitude_effect = c('attitudeeffect')
 )
+
+willingness_scores <- scoreItems(
+  keys = keys_list,
+  items = d_willingness,
+  totals = FALSE,
+  missing = TRUE,
+  impute = 'none'
+)
+
+cbind(d_willingness, willingness_scores$scores)
 ```
 
 # Demographic characteristics of the sample
@@ -124,15 +158,127 @@ d_willingness %>%
 
 ```{r}
 d_willingness %>%
-  select(ends_with('effect'))
-  apply()
+  summarise(
+    n = n(),
+    M = mean(visaeffect) %>% round(digits = 2), 
+    Mdn = median(visaeffect),
+    SD = sd(visaeffect) %>% round(digits = 2))
+d_willingness %>%
+summarise(
+    n = n(),
+    M = mean(attitudeeffect) %>% round(digits = 2), 
+    Mdn = median(attitudeeffect),
+    SD = sd(attitudeeffect) %>% round(digits = 2))
+d_willingness %>%
+summarise(
+    n = n(),
+    M = mean(homesicknesseffect) %>% round(digits = 2), 
+    Mdn = median(homesicknesseffect),
+    SD = sd(homesicknesseffect) %>% round(digits = 2))
+d_willingness %>%
+summarise(
+    n = n(),
+    M = mean(cultureeffect) %>% round(digits = 2), 
+    Mdn = median(cultureeffect),
+    SD = sd(cultureeffect) %>% round(digits = 2))
 
+
+```
+## rank
+```{r}
+d_willingness %>%
+  summarise(
+    n = n(),
+    M = mean(rankpsw_coded) %>% round(digits = 2), 
+    Mdn = median(rankpsw_coded),
+    SD = sd(rankpsw_coded) %>% round(digits = 2))
+d_willingness %>%
+  summarise(
+    n = n(),
+    M = mean(rankt2_coded) %>% round(digits = 2), 
+    Mdn = median(rankt2_coded),
+    SD = sd(rankt2_coded) %>% round(digits = 2))
+d_willingness %>%
+  summarise(
+    n = n(),
+    M = mean(rankfamily_coded) %>% round(digits = 2), 
+    Mdn = median(rankfamily_coded),
+    SD = sd(rankfamily_coded) %>% round(digits = 2))
+d_willingness %>%
+  summarise(
+    n = n(),
+    M = mean(rankculture_coded) %>% round(digits = 2), 
+    Mdn = median(rankculture_coded),
+    SD = sd(rankculture_coded) %>% round(digits = 2))
+d_willingness %>%
+  summarise(
+    n = n(),
+    M = mean(rankhomesick_coded) %>% round(digits = 2), 
+    Mdn = median(rankhomesick_coded),
+    SD = sd(rankhomesick_coded) %>% round(digits = 2))
 
 ```
 
 
+##visual
+```{r}
+d_willingness %>%
+  ggplot(aes(x = pswdifficulty, fill = gender)) +
+  geom_histogram(
+    binwidth = 0.5)
+```
 
+## correlation
 
+```{r}
+cor(d_willingness$pswdifficulty, d_willingness$visaeffect)
+
+cor(d_willingness$t2difficulty, d_willingness$visaeffect)
+
+cor(d_willingness$homesicknesseffect, d_willingness$homesick_coded)
+
+cor(d_willingness$familyattitude_coded, d_willingness$attitudeeffect)
+
+d_willingness %>%
+  ggplot(aes(x = pswdifficulty, y = visaeffect)) +
+  geom_jitter(size = 0.5)+
+  geom_smooth(method=lm)
+
+d_willingness %>%
+  ggplot(aes(x = t2difficulty, y = visaeffect)) +
+  geom_jitter(size = 0.5)+
+  geom_smooth(method=lm)
+
+d_willingness %>%
+  ggplot(aes(x = homesick_coded, y = homesicknesseffect)) +
+  geom_jitter(size = 0.5)+
+  geom_smooth(method=lm)
+
+d_willingness %>%
+  ggplot(aes(x = familyattitude_coded, y = attitudeeffect)) +
+  geom_jitter(size = 0.5)+
+  geom_smooth(method=lm)
+```
+
+```{r}
+cor.test(d_willingness$pswdifficulty, d_willingness$visaeffect)
+
+cor.test(d_willingness$t2difficulty, d_willingness$visaeffect)
+
+cor.test(d_willingness$homesicknesseffect, d_willingness$homesick_coded)
+
+cor.test(d_willingness$familyattitude_coded, d_willingness$attitudeeffect)
+```
+
+```{r}
+d_willingness %>%
+  mutate(Female = Female %>% as.numeric) %>%
+  cor.test(~ vac_attitude + Female, data = .)
+d_willingness %>%
+  cor.test(~ vac_attitude + gov_trust, data = .)
+d_willingness %>%
+  cor.test(~ vac_attitude + age, data = .)
+```
 
 
 
